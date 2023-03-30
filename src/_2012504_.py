@@ -1,0 +1,1 @@
+def select_move(cur_state, player_to_move, remain_time): pass

@@ -128,6 +128,10 @@ class Problem:
                 if player == X_SIGNAL:
                     self.X_score += len(catch_opponent)
                     self.O_score -= len(catch_opponent)
+                else:
+                    self.X_score -= len(catch_opponent)
+                    self.O_score += len(catch_opponent)
+
 
         
 class AI_Using:

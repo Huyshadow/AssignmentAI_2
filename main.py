@@ -58,13 +58,13 @@ class Problem:
         move_x = 0 
         move_y = 0 
         if dir in ("n", "n_w", "n_e"):
-            move_x = move_x - 1
+            move_x = -1
         elif dir in ("s", "s_w", "s_e"):
-            move_x = move_x + 1
+            move_x =  1
         if dir in ("w", "n_w", "s_w"):
-            move_y = move_y - 1
+            move_y = -1
         elif dir in ("e", "n_e", "s_e"):
-            move_y = move_y + 1
+            move_y = 1
         x = start[0] + move_x
         y = start[1] + move_y
 
@@ -72,9 +72,10 @@ class Problem:
         while not self.invalid_move(x,y):
             if self.board[x,y] == opponent:
                 last_seen_oppo = [x,y]
-            elif self.board[x,y] == player: break
+            elif self.board[x,y] == player: 
+                break
             elif self.board[x,y] == EMPTY:
-                if last_seen_oppo:
+                if last_seen_oppo is not None:
                     if not self.invalid_move(x,y):
                         self.board[x,y] = VALID_MOVE
                         moves.append((GetTrack(x,y)))
@@ -97,24 +98,25 @@ class Problem:
         opponent = O_SIGNAL if player_to_move == X_SIGNAL else X_SIGNAL
         for direction in DIRECTIONS:
             self.movechosing_single_dir(player_to_move, opponent, move, direction)
+    
 
     def movechosing_single_dir(self, player, opponent, move, dir):
         move_x = 0
         move_y = 0
-        if dir in ("n", "n_w", "n_e"):
-            move_x = move_x - 1
+        if dir in ("n", "n_w", "n_s"):
+            move_x = -1
         elif dir in ("s", "s_w", "s_e"):
-            move_x = move_x + 1
+            move_x = 1
         if dir in ("w", "n_w", "s_w"):
-            move_y = move_y - 1
+            move_y = -1
         elif dir in ("e", "n_e", "s_e"):
-            move_y = move_y - 1
-        
+            move_y = 1
+
         x = move[0] + move_x
         y = move[1] + move_y
 
         catch_opponent= []
-        while not self.invalid_move(x,y):
+        while not self.invalid_move(x, y):
             if self.board[x,y] == opponent:
                 catch_opponent.append([x,y])
             elif self.board[x,y] == player:
@@ -130,8 +132,8 @@ class Problem:
             elif self.board[x,y] == EMPTY:
                 break
             x += move_x
-            y += move_y
-    
+            y += move_y   
+
     def status(self):
         if self.X_score== 0:
             self.O_score = self.n * self.n
@@ -253,7 +255,7 @@ class AI_Using:
             return min_eval
 
     def result_move(self, player_to_move):
-        opponent = O_SIGNAL if player_to_move == X_SIGNAL else O_SIGNAL
+        opponent = O_SIGNAL if player_to_move == X_SIGNAL else X_SIGNAL
         start_time = time.time()
         result_move = self.alpha_beta_pruning(self.problem, self.depth, player_to_move, opponent)
         self.problem.board[result_move.x,result_move.y] = player_to_move
@@ -271,6 +273,8 @@ def select_move(cur_state, player_to_move, remain_time):
     game = Problem(length_board, cur_state)
     solution = AI_Using(player_to_move, True, 5 ,'simple', True, game)
     result, time_consume = solution.result_move(player_to_move)
+    if(result == None):
+        return None
     print(f"Timecost is: {time_consume} seconds")
     if(time_consume > 3):
         print("Optimize algorithm hurry")
@@ -286,14 +290,16 @@ if __name__ == "__main__":
     cur_state[3,4] = -1
     cur_state[4,4] = 1
     cur_state[4,3] = -1
+    print(cur_state)
+    cur_state
     while num.count_nonzero(cur_state == 0) != 0:
         result = select_move(cur_state, 1, 60)
         print(f"Node to choose: {result}")
         print(cur_state)
+        if (result == None): break
         if (num.count_nonzero(cur_state == 0) == 0): break
         result = select_move(cur_state, -1, 60)
         print(f"Node to choose: {result}")
         print(cur_state)
-        
     
     

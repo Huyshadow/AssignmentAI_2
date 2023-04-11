@@ -1,4 +1,5 @@
 import copy
+from copy import deepcopy
 import numpy as num 
 import time
 #from constant import *
@@ -97,7 +98,7 @@ class Problem:
             self.O_score += 1
         opponent = O_SIGNAL if player_to_move == X_SIGNAL else X_SIGNAL
         for direction in DIRECTIONS:
-            self.movechosing_single_dir(player_to_move, opponent, move, direction)
+            self.movechosing_single_dir(player_to_move, opponent, move, direction) 
     
 
     def movechosing_single_dir(self, player, opponent, move, dir):
@@ -135,7 +136,7 @@ class Problem:
             y += move_y   
 
     def status(self):
-        if self.X_score== 0:
+        if self.X_score == 0:
             self.O_score = self.n * self.n
             return "O is winner"
         elif self.O_score == 0:
@@ -170,13 +171,12 @@ class Problem:
             else:
                 self.last_move.value = -100
 
-    def advanced_evaluation_fn(self, player):
+    def advanced_eval_fn(self, player):
         moves = self.move_possible(player)
         number_of_moves = len(moves)
         if player == MINIMAX_PLAYER:
             self.last_move.value = number_of_moves
         self.last_move.value = -number_of_moves
-
 
         
 class AI_Using:
@@ -188,71 +188,75 @@ class AI_Using:
         self.move_ordering = move_ordering
         self.turns = 0
         self.branches_evaluated = 0
-        self.nodes_per_level = [0]*(self.depth + 1)
         self.problem = problem
 
 
-    def alpha_beta_pruning(self, problem:Problem, depth, player_to_move, opponent, alpha = float('-inf'), beta = float('inf')):
-        self.nodes_per_level[-(depth + 1)] += 1 
-        possible_return = problem.move_possible(player_to_move)
-        if len(possible_return) == 0 and depth == self.depth:
+    def alpha_beta_pruning(self, problem:Problem, depth, player, opponent, alpha = float('-inf'), beta = float('inf')):
+        possible_moves = problem.move_possible(player)
+        if len(possible_moves) == 0 and depth == self.depth:
             return GetTrack()
-        if depth == 0 or problem.status() != "Ongoing" or len(possible_return) == 0:
+        if depth == 0 or problem.status() != "Ongoing" or len(possible_moves) == 0:
             if self.evaluation_fn == "simple":
                 problem.simple_eval_fn()
             else:
-                problem.advanced_evaluation_fn()
+                problem.advanced_eval_fn(player)
             return problem.last_move
-        if player_to_move == MINIMAX_PLAYER:
-            max_eval = GetTrack(value=float('-inf'))
+        if player == MINIMAX_PLAYER:
+            max_evaluation = GetTrack(value=float('-inf'))
             if self.move_ordering:
-                for result in possible_return:
-                    clone = copy.deepcopy(problem)
-                    clone.move_choosing(player_to_move, [result.x,result.y])
+                for move in possible_moves:
+                    clone = deepcopy(problem)
+                    clone.move_choosing(player, [move.x, move.y])
                     if self.evaluation_fn == "simple":
-                        clone.simple_eval_fn()
+                        problem.simple_eval_fn()
                     else:
-                        clone.advanced_evaluation_fn()
-                    result.value = clone.last_move.value
+                        problem.advanced_eval_fn(player)
+                    move.value = clone.last_move.value
                     del clone
-                possible_return = sorted(possible_return, key = lambda x : x.value)
-            for result in possible_return:
-                new_state = copy.deepcopy(problem)
-                new_state.move_choosing(player_to_move,[result.x,result.y])
-                move_eval = self.alpha_beta_pruning(new_state, depth - 1, opponent, player_to_move, alpha, beta)
-                del new_state
-                if max_eval.value < move_eval.value:
-                    max_eval.value = move_eval.value
-                    max_eval.x = move_eval.x
-                    max_eval.y = move_eval.y
-                alpha = max(alpha, move_eval.value)
-                if beta <= alpha: break
-            return max_eval
+                possible_moves = sorted(possible_moves, key=lambda x: x.value, reverse=True)
+            for move in possible_moves:
+                self.branches_evaluated += 1
+                new_game = deepcopy(problem)
+                new_game.move_choosing(player, [move.x, move.y])
+                move_evaluation = self.alpha_beta_pruning(new_game, depth - 1, opponent, player, alpha, beta)
+                del new_game
+                if max_evaluation.value < move_evaluation.value:
+                    max_evaluation.value = move_evaluation.value
+                    max_evaluation.x = move.x
+                    max_evaluation.y = move.y
+                alpha = max(alpha, move_evaluation.value)
+                if beta <= alpha:
+                    break
+            return max_evaluation
         else:
-            min_eval = GetTrack(value=float('inf'))
+            min_evaluation = GetTrack(value=float('inf'))
             if self.move_ordering:
-                for result in possible_return:
-                    clone = copy.deepcopy(problem)
-                    clone.move_choosing(player_to_move, [result.x,result.y])
+                for move in possible_moves:
+                    clone = deepcopy(problem)
+                    clone.move_choosing(player, [move.x, move.y])
                     if self.evaluation_fn == "simple":
-                        clone.simple_eval_fn()
+                        clone.simple_evaluation_fn()
                     else:
-                        clone.advanced_evaluation_fn()
-                    result.value = clone.last_move.value
+                        clone.advanced_evaluation_fn(player)
+                    move.value = clone.last_move.value
                     del clone
-                possible_return =sorted(possible_return, key = lambda x : x.value)
-            for result in possible_return:
-                new_state = copy.deepcopy(problem)
-                new_state.move_choosing(player_to_move,[result.x,result.y])
-                move_eval = self.alpha_beta_pruning(new_state,depth - 1, opponent, player_to_move, alpha, beta)
-                del new_state
-                if min_eval.value > move_eval.value:
-                    min_eval.value = move_eval.value
-                    min_eval.x = move_eval.x
-                    min_eval.y = move_eval.y
-                beta = min(alpha, move_eval.value)
-                if beta <= alpha: break
-            return min_eval
+                possible_moves = sorted(possible_moves, key=lambda x: x.value)
+            for move in possible_moves:
+                self.branches_evaluated += 1
+                new_game = deepcopy(problem)
+                new_game.move_choosing(player, [move.x, move.y])
+                move_evaluation = self.alpha_beta_pruning(new_game, depth - 1, opponent, player, alpha, beta)
+                del new_game
+                if min_evaluation.value > move_evaluation.value:
+                    min_evaluation.value = move_evaluation.value
+                    min_evaluation.x = move.x
+                    min_evaluation.y = move.y
+                beta = min(beta, move_evaluation.value)
+                if beta <= alpha:
+                    break
+            return min_evaluation
+        
+
 
     def result_move(self, player_to_move):
         opponent = O_SIGNAL if player_to_move == X_SIGNAL else X_SIGNAL
@@ -271,7 +275,7 @@ def select_move(cur_state, player_to_move, remain_time):
     #Calculate time
     length_board = len(cur_state)
     game = Problem(length_board, cur_state)
-    solution = AI_Using(player_to_move, True, 5 ,'simple', True, game)
+    solution = AI_Using(player_to_move, True, 5 ,'simple', False, game)
     result, time_consume = solution.result_move(player_to_move)
     if(result == None):
         return None
@@ -291,15 +295,23 @@ if __name__ == "__main__":
     cur_state[4,4] = 1
     cur_state[4,3] = -1
     print(cur_state)
-    cur_state
+    print("-----------------------------------------------")
+    
     while num.count_nonzero(cur_state == 0) != 0:
-        result = select_move(cur_state, 1, 60)
+        result = select_move(cur_state, X_SIGNAL, 60)
+        if (result == None): 
+            print('False') 
+            break
         print(f"Node to choose: {result}")
         print(cur_state)
-        if (result == None): break
-        if (num.count_nonzero(cur_state == 0) == 0): break
-        result = select_move(cur_state, -1, 60)
+        print("-----------------------------------------------")
+        if (num.count_nonzero(cur_state == 0) == 0): break 
+        result = select_move(cur_state, O_SIGNAL, 60)
+        if (result == None): 
+            print('False')
+            break 
         print(f"Node to choose: {result}")
-        print(cur_state)
+        print(cur_state) 
+        print("-----------------------------------------------")
     
     

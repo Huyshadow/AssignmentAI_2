@@ -269,7 +269,8 @@ class AI_Using:
         return None, time_consumed
     
 
-#design curstate by using Othello.py
+#Running Function to find tuple
+
 def select_move(cur_state, player_to_move, remain_time): 
     cur_state = num.array(cur_state)
     #Calculate time
@@ -288,5 +289,5 @@ def select_move(cur_state, player_to_move, remain_time):
     remain_time -= time_consume
     if(remain_time < 0):
         print(f"Player {player_to_move} is Loser")
-        return None
+        return result.x, result.y
     return result.x, result.y

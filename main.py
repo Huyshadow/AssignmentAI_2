@@ -32,7 +32,9 @@ class Problem:
         self.n = n 
         self.board = curstate
         self.X_score = num.count_nonzero(self.board == X_SIGNAL)
+        print(self.X_score)
         self.O_score = num.count_nonzero(self.board == O_SIGNAL)
+        print(self.O_score)
         self.no_moves_sema = 0
         self.minimax = minimax_player
         self.last_move = None
@@ -258,15 +260,16 @@ class AI_Using:
         opponent = O_SIGNAL if player_to_move == X_SIGNAL else X_SIGNAL
         start_time = time.time()
         result_move = self.alpha_beta_pruning(self.problem, self.depth, player_to_move, opponent)
-        self.problem.board[result_move.x,result_move.y] = player_to_move
-        self.problem.move_choosing(player_to_move,[result_move.x,result_move.y])
+        if (result_move.x != -1):
+            self.problem.board[result_move.x,result_move.y] = player_to_move
+            self.problem.move_choosing(player_to_move,[result_move.x,result_move.y])
         time_consumed = time.time() - start_time
         if result_move.x != -1 and result_move.y != -1:
             return result_move, time_consumed
         return None, time_consumed
     
 
-#Running Function to find tuple
+#---------------------Running Function to find tuple for game----------------------# 
 
 def select_move(cur_state, player_to_move, remain_time): 
     """ cur_state = num.array(cur_state) """
@@ -284,7 +287,7 @@ def select_move(cur_state, player_to_move, remain_time):
     print(f"Timecost is: {time_consume} seconds")
     if(time_consume >= 3):
         print(f"Time-consuming, {player_to_move} lose the match")
-        return result
+        return result.x, result.y
     remain_time -= time_consume
     if(remain_time < 0):
         print(f"Player {player_to_move} is Loser")
@@ -315,14 +318,14 @@ if __name__ == "__main__":
     remaintime = 60
     print(cur_state)
     while num.count_nonzero(cur_state != 0) != 0:
-        result = select_move(cur_state, O_SIGNAL, remaintime)
+        result = select_move(cur_state, X_SIGNAL, remaintime)
         if (result == None): 
             break
         print(f"Node to choose: {result}")
         print(cur_state)
         print("-----------------------------------------------")
         if (num.count_nonzero(cur_state == 0) == 0): break 
-        result = select_move(cur_state, X_SIGNAL, remaintime)
+        result = select_move(cur_state, O_SIGNAL, remaintime)
         if (result == None): 
             break 
         print(f"Node to choose: {result}")

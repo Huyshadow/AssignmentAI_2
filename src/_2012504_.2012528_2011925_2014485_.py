@@ -1,5 +1,4 @@
 import copy
-from copy import deepcopy
 import numpy as num 
 import time
 #from constant import *
@@ -202,10 +201,10 @@ class AI_Using:
                 problem.advanced_eval_fn(player)
             return problem.last_move
         if player == MINIMAX_PLAYER:
-            max_evaluation = GetTrack(value=float('-inf'))
+            max_eval = GetTrack(value=float('-inf'))
             if self.move_ordering:
                 for move in possible_moves:
-                    clone = deepcopy(problem)
+                    clone = copy.deepcopy(problem)
                     clone.move_choosing(player, [move.x, move.y])
                     if self.evaluation_fn == "simple":
                         problem.simple_eval_fn()
@@ -216,23 +215,23 @@ class AI_Using:
                 possible_moves = sorted(possible_moves, key=lambda x: x.value, reverse=True)
             for move in possible_moves:
                 self.branches_evaluated += 1
-                new_game = deepcopy(problem)
+                new_game = copy.deepcopy(problem)
                 new_game.move_choosing(player, [move.x, move.y])
                 move_evaluation = self.alpha_beta_pruning(new_game, depth - 1, opponent, player, alpha, beta)
                 del new_game
-                if max_evaluation.value < move_evaluation.value:
-                    max_evaluation.value = move_evaluation.value
-                    max_evaluation.x = move.x
-                    max_evaluation.y = move.y
+                if max_eval.value < move_evaluation.value:
+                    max_eval.value = move_evaluation.value
+                    max_eval.x = move.x
+                    max_eval.y = move.y
                 alpha = max(alpha, move_evaluation.value)
                 if beta <= alpha:
                     break
-            return max_evaluation
+            return max_eval
         else:
-            min_evaluation = GetTrack(value=float('inf'))
+            min_eval = GetTrack(value=float('inf'))
             if self.move_ordering:
                 for move in possible_moves:
-                    clone = deepcopy(problem)
+                    clone = copy.deepcopy(problem)
                     clone.move_choosing(player, [move.x, move.y])
                     if self.evaluation_fn == "simple":
                         clone.simple_evaluation_fn()
@@ -243,18 +242,18 @@ class AI_Using:
                 possible_moves = sorted(possible_moves, key=lambda x: x.value)
             for move in possible_moves:
                 self.branches_evaluated += 1
-                new_game = deepcopy(problem)
+                new_game = copy.deepcopy(problem)
                 new_game.move_choosing(player, [move.x, move.y])
                 move_evaluation = self.alpha_beta_pruning(new_game, depth - 1, opponent, player, alpha, beta)
                 del new_game
-                if min_evaluation.value > move_evaluation.value:
-                    min_evaluation.value = move_evaluation.value
-                    min_evaluation.x = move.x
-                    min_evaluation.y = move.y
+                if min_eval.value > move_evaluation.value:
+                    min_eval.value = move_evaluation.value
+                    min_eval.x = move.x
+                    min_eval.y = move.y
                 beta = min(beta, move_evaluation.value)
                 if beta <= alpha:
                     break
-            return min_evaluation
+            return min_eval
         
 
 
@@ -272,6 +271,7 @@ class AI_Using:
 
 #design curstate by using Othello.py
 def select_move(cur_state, player_to_move, remain_time): 
+    cur_state = num.array(cur_state)
     #Calculate time
     length_board = len(cur_state)
     game = Problem(length_board, cur_state)
@@ -284,32 +284,5 @@ def select_move(cur_state, player_to_move, remain_time):
         print("Optimize algorithm hurry")
     remain_time -= time_consume
     if(remain_time < 0):
-        print("Player is Loser")
+        print(f"Player {player_to_move} is Loser")
     return result.x, result.y
-    
-    
-if __name__ == "__main__":
-    cur_state = num.zeros((8,8),dtype = int)
-    cur_state[3,3] = 1
-    cur_state[3,4] = -1
-    cur_state[4,4] = 1
-    cur_state[4,3] = -1
-    print(cur_state)
-    print("-----------------------------------------------")
-    
-    while num.count_nonzero(cur_state == 0) != 0:
-        result = select_move(cur_state, X_SIGNAL, 60)
-        if (result == None): 
-            print('False') 
-            break
-        print(f"Node to choose: {result}")
-        print(cur_state)
-        print("-----------------------------------------------")
-        if (num.count_nonzero(cur_state == 0) == 0): break 
-        result = select_move(cur_state, O_SIGNAL, 60)
-        if (result == None): 
-            print('False')
-            break 
-        print(f"Node to choose: {result}")
-        print(cur_state) 
-        print("-----------------------------------------------")

@@ -278,11 +278,15 @@ def select_move(cur_state, player_to_move, remain_time):
     solution = AI_Using(player_to_move, True, 5 ,'simple', False, game)
     result, time_consume = solution.result_move(player_to_move)
     if(result == None):
+        print(f"Can't find result")
+        print(game.status)
         return None
     print(f"Timecost is: {time_consume} seconds")
-    if(time_consume > 3):
-        print("Optimize algorithm hurry")
+    if(time_consume >= 3):
+        print(f"Time-consuming, {player_to_move} lose the match")
+        return result
     remain_time -= time_consume
     if(remain_time < 0):
         print(f"Player {player_to_move} is Loser")
+        return None
     return result.x, result.y

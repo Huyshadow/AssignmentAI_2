@@ -271,37 +271,42 @@ class AI_Using:
 
 #design curstate by using Othello.py
 def select_move(cur_state, player_to_move, remain_time): 
-    """ cur_state = num.array(cur_state) """
+    cur_state = num.array(cur_state)
     #Calculate time
     length_board = len(cur_state)
     game = Problem(length_board, cur_state)
     solution = AI_Using(player_to_move, True, 5 ,'simple', False, game)
     result, time_consume = solution.result_move(player_to_move)
     if(result == None):
+        print(f"Can't find result")
+        print(game.status())
         return None
     print(f"Timecost is: {time_consume} seconds")
-    if(time_consume > 3):
-        print("Optimize algorithm hurry")
+    if(time_consume >= 3):
+        print(f"Time-consuming, {player_to_move} lose the match")
+        return result
     remain_time -= time_consume
     if(remain_time < 0):
         print(f"Player {player_to_move} is Loser")
+        return None
+    print(game.status())
     return result.x, result.y
     
     
 if __name__ == "__main__":
-    # input is Array 
+    """ # input is Array 
     cur_state = num.zeros((8,8),dtype = int)
     cur_state[3,3] = 1
     cur_state[3,4] = -1
     cur_state[4,4] = 1
-    cur_state[4,3] = -1
-    """ # input is List
+    cur_state[4,3] = -1 """
+    # input is List
     cur_state = [[0,0,0,0,0,0,0,0] for x in range(8)]
     cur_state[3][3] = 1
     cur_state[3][4] = -1
     cur_state[4][4] = 1
     cur_state[4][3] = -1 
-    print(cur_state)
+    """ print(cur_state)
     print("-----------------------------------------------")
     
     result = select_move(cur_state, X_SIGNAL, remaintime)
@@ -311,22 +316,25 @@ if __name__ == "__main__":
     remaintime = 60
     print(cur_state)
     # Just Check Some thing new :3
-    while num.count_nonzero(cur_state == 0) != 0:
-        result = select_move(cur_state, X_SIGNAL, remaintime)
+    x = 0
+    while x != 64:
+        result = select_move(cur_state, O_SIGNAL, remaintime)
         if (result == None): 
             print('False') 
             break
         print(f"Node to choose: {result}")
+        cur_state[result[0]][result[1]] = O_SIGNAL
         print(cur_state)
         print("-----------------------------------------------")
         if (num.count_nonzero(cur_state == 0) == 0): break 
-        result = select_move(cur_state, O_SIGNAL, remaintime)
+        result = select_move(cur_state, X_SIGNAL, remaintime)
         if (result == None): 
             print('False')
             break 
         print(f"Node to choose: {result}")
+        cur_state[result[0]][result[1]] = X_SIGNAL
         print(cur_state) 
         print("-----------------------------------------------")
-    
+        x += 1
     print(remaintime)
     

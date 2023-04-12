@@ -216,7 +216,6 @@ class AI_Using:
                     del clone
                 possible_moves = sorted(possible_moves, key=lambda x: x.value, reverse=True)
             for move in possible_moves:
-                self.branches_evaluated += 1
                 new_game = copy.deepcopy(problem)
                 new_game.move_choosing(player, [move.x, move.y])
                 move_evaluation = self.alpha_beta_pruning(new_game, depth - 1, opponent, player, alpha, beta)
@@ -243,7 +242,6 @@ class AI_Using:
                     del clone
                 possible_moves = sorted(possible_moves, key=lambda x: x.value)
             for move in possible_moves:
-                self.branches_evaluated += 1
                 new_game = copy.deepcopy(problem)
                 new_game.move_choosing(player, [move.x, move.y])
                 move_evaluation = self.alpha_beta_pruning(new_game, depth - 1, opponent, player, alpha, beta)
@@ -290,3 +288,15 @@ def select_move(cur_state, player_to_move, remain_time):
         print(f"Player {player_to_move} is Loser")
         return result.x, result.y
     return result.x, result.y
+
+""" if __name__ == "__main__":
+    # Input is List
+    cur_state = [[0,0,0,0,0,0,0,0] for x in range(8)]
+    cur_state[3][3] = 1
+    cur_state[3][4] = -1
+    cur_state[4][4] = 1
+    cur_state[4][3] = 1 
+    cur_state[5][3] = 1
+    result1, result2 = select_move(cur_state, -1, 60)
+    print((result1, result2)) """
+   

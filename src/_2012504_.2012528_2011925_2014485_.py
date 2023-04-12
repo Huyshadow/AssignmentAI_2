@@ -16,7 +16,6 @@ DIRECTIONS = [
     "s_w",
     "s_e"
 ]
-MINIMAX_PLAYER = X_SIGNAL
 VALID_MOVE = 2
 LAST_MOVE = 3
 
@@ -29,12 +28,13 @@ class GetTrack:
 
 
 class Problem:
-    def __init__(self,n,curstate):
+    def __init__(self,n,curstate, minimax_player):
         self.n = n 
         self.board = curstate
         self.X_score = num.count_nonzero(self.board == X_SIGNAL)
         self.O_score = num.count_nonzero(self.board == O_SIGNAL)
         self.no_moves_sema = 0
+        self.minimax = minimax_player
         self.last_move = None
 
     def move_possible(self, player_to_move): # Chỉ có thể là 1 hoặc -1
@@ -155,17 +155,17 @@ class Problem:
     def simple_eval_fn(self):
         game_status = self.status()
         if game_status == "Ongoing" or game_status == "Equal":
-            if MINIMAX_PLAYER == O_SIGNAL:
+            if self.minimax == O_SIGNAL:
                 self.last_move.value = self.O_score - self.X_score
             else:
                 self.last_move.value = self.X_score - self.O_score
         elif game_status == "X is winner":
-            if MINIMAX_PLAYER == X_SIGNAL:
+            if self.minimax == X_SIGNAL:
                 self.last_move.value = 100
             else:
                 self.last_move.value = -100
         elif game_status == "O is winner":
-            if MINIMAX_PLAYER == O_SIGNAL:
+            if self.minimax == O_SIGNAL:
                 self.last_move.value = 100
             else:
                 self.last_move.value = -100
@@ -173,20 +173,19 @@ class Problem:
     def advanced_eval_fn(self, player):
         moves = self.move_possible(player)
         number_of_moves = len(moves)
-        if player == MINIMAX_PLAYER:
+        if player == self.minimax:
             self.last_move.value = number_of_moves
         self.last_move.value = -number_of_moves
 
         
 class AI_Using:
-    def __init__(self, identifier, hints, depth, evaluation_fn, move_ordering , problem:Problem):
+    def __init__(self, identifier, hints, depth, evaluation_fn, move_ordering , problem:Problem, minimax_player):
         self.identifier = identifier
         self.hints = hints
         self.depth = depth
         self.evaluation_fn = evaluation_fn
         self.move_ordering = move_ordering
-        self.turns = 0
-        self.branches_evaluated = 0
+        self.minimax = minimax_player
         self.problem = problem
 
 
@@ -200,7 +199,7 @@ class AI_Using:
             else:
                 problem.advanced_eval_fn(player)
             return problem.last_move
-        if player == MINIMAX_PLAYER:
+        if player == self.minimax:
             max_eval = GetTrack(value=float('-inf'))
             if self.move_ordering:
                 for move in possible_moves:
@@ -272,15 +271,15 @@ class AI_Using:
 #Running Function to find tuple
 
 def select_move(cur_state, player_to_move, remain_time): 
+    #Convert curstate into array
     cur_state = num.array(cur_state)
     #Calculate time
     length_board = len(cur_state)
-    game = Problem(length_board, cur_state)
-    solution = AI_Using(player_to_move, True, 5 ,'simple', False, game)
+    game = Problem(length_board, cur_state, player_to_move)
+    solution = AI_Using(player_to_move, True, 5 ,'simple', False, game, player_to_move)
     result, time_consume = solution.result_move(player_to_move)
     if(result == None):
         print(f"Can't find result")
-        print(game.status)
         return None
     print(f"Timecost is: {time_consume} seconds")
     if(time_consume >= 3):

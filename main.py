@@ -32,9 +32,9 @@ class Problem:
         self.n = n 
         self.board = curstate
         self.X_score = num.count_nonzero(self.board == X_SIGNAL)
-        print(self.X_score)
+        print(f"X Score: {self.X_score}")
         self.O_score = num.count_nonzero(self.board == O_SIGNAL)
-        print(self.O_score)
+        print(f"O Score: {self.O_score}")
         self.no_moves_sema = 0
         self.minimax = minimax_player
         self.last_move = None
@@ -296,19 +296,6 @@ def select_move(cur_state, player_to_move, remain_time):
     
     
 if __name__ == "__main__":
-    """ # input is List
-    cur_state = [[0,0,0,0,0,0,0,0] for x in range(8)]
-    cur_state[3][3] = 1
-    cur_state[3][4] = -1
-    cur_state[4][4] = 1
-    cur_state[4][3] = -1  """
-    """ print(cur_state)
-    print("-----------------------------------------------")
-    
-    result = select_move(cur_state, X_SIGNAL, remaintime)
-    if (result == None): 
-        print('False') 
-    print(f"Node to choose: {result}") """
     # input is Array 
     cur_state = num.zeros((8,8),dtype = int)
     cur_state[3,3] = 1

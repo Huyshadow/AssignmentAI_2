@@ -180,6 +180,7 @@ class Problem:
             self.last_move.value = number_of_moves
         self.last_move.value = -number_of_moves
 
+#---------------------Agent to findout the next node----------------------# 
         
 class AI_Using:
     def __init__(self, identifier, hints, depth, evaluation_fn, move_ordering , problem:Problem, minimax_player):
